@@ -1,5 +1,6 @@
 package cn.com.sai.kindle.anki.data;
 
+import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +18,10 @@ public class VocabDBConnector {
     private String[] booksArray;
     public VocabDBConnector(String path, String books) {
         try {
+            File file = new File(path);
+            if (!file.isFile()) {
+                throw new RuntimeException("no db is found!");
+            }
             String url = "jdbc:sqlite:" + path;
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection(url);
@@ -35,9 +40,9 @@ public class VocabDBConnector {
         booksArray = books.split(";");
     }
 
+
     public Map<String, List<Vocab>> getVocabList() {
         Map<String, List<Vocab>> titleToWords = new HashMap<>();
-//        List<Vocab> ret = new ArrayList<>();
         String sql = getSQL();
         System.out.println(sql);
         try {
@@ -57,7 +62,6 @@ public class VocabDBConnector {
                 vocab.setAuthors(resultSet.getString("authors"));
                 vocab.setUsage(usage);
                 titleToWords.get(title).add(vocab);
-//                ret.add(vocab);
             }
             resultSet.close();
         } catch (SQLException e) {
